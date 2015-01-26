@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class University {
 	public int Id;
 	public ArrayList<Integer> student_list = new ArrayList<Integer>();
+	public double weight;
 	private Student tmp_connected_student = null;
 	
 	public boolean prefers(Student student)

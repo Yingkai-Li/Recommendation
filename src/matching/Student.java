@@ -6,6 +6,7 @@ import java.util.List;
 public class Student {
 	private int Id;
 	private double GPA;
+	public int recommended_number;
 	private ArrayList<Integer> preference = new ArrayList<Integer>();
 	public boolean tmp_match_status = false;
 	public int propose_num = 0;
@@ -33,6 +34,10 @@ public class Student {
 	
 	public void remove_preference(int Id) {
 		preference.remove(Integer.valueOf(Id));
+	}
+	
+	public int find_preference_index(int Id) {
+		return preference.indexOf(Id);
 	}
 	
 	public int get_prefernce_size() {
