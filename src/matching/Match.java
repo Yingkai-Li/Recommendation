@@ -156,6 +156,24 @@ public class Match {
 	
 	private static double calculate_probability(double score, int rank, int school_id) {
 		double p =  (score * Math.sqrt(Math.sqrt(school_id))) / (Math.sqrt(rank) * 200.0);
+		/*if (school_id == 0) {
+			return 0.2;
+		}
+		if (school_id == 1) {
+			return 0.3;
+		}
+		if (school_id == 2) {
+			return 0.5;
+		}
+		if (school_id == 3) {
+			return 0.6;
+		}
+		if (school_id == 4) {
+			return 0;
+		}
+		if (school_id > 4) {
+			return 0;
+		}*/
 		if (p > 1.0) {
 			return 1.0;
 		}
@@ -251,7 +269,9 @@ public class Match {
 		for (i = 0; i < university_num; i++) {
 			University tmp_university = new University();
 			tmp_university.Id = i;
-			tmp_university.weight = 10.0 / (double)(i+1);
+			tmp_university.weight = 1.0;
+			//tmp_university.weight = 10.0 / (double)(i+1);
+			//tmp_university.weight = 10 - i;
 			universities.add(tmp_university);
 		}
 		/*for (i = 0; i < 15; i++) {
@@ -267,33 +287,35 @@ public class Match {
 		}*/
 		Student s0 = new Student();
 		s0.setId(0);
-		s0.setGPA(92.7);
+		s0.setGPA(99.7);
 		s0.recommended_number = 3;
 		List<Integer> pref0 = new ArrayList<Integer>();
+		//pref0.add(0);
 		pref0.add(1);
 		pref0.add(2);
 		pref0.add(3);
-		//pref0.add(4);
-		//pref0.add(5);
+		pref0.add(4);
+		pref0.add(5);
 		s0.set_preference(pref0);
 		students.add(s0);
 		
 		Student s1 = new Student();
 		s1.setId(1);
-		s1.setGPA(91.7);
+		s1.setGPA(90.7);
 		s1.recommended_number = 3;
 		List<Integer> pref1 = new ArrayList<Integer>();
+		//pref1.add(0);
 		pref1.add(1);
 		pref1.add(2);
 		pref1.add(3);
 		pref1.add(4);
-		//pref1.add(5);
+		pref1.add(5);
 		s1.set_preference(pref1);
 		students.add(s1);
 		
 		Student s2 = new Student();
 		s2.setId(2);
-		s2.setGPA(89.4);
+		s2.setGPA(79.4);
 		s2.recommended_number = 3;
 		List<Integer> pref2 = new ArrayList<Integer>();
 		pref2.add(1);
@@ -301,12 +323,14 @@ public class Match {
 		pref2.add(3);
 		pref2.add(4);
 		pref2.add(5);
+		pref2.add(6);
+		pref2.add(7);
 		s2.set_preference(pref2);
 		students.add(s2);
 
 		Student s3 = new Student();
 		s3.setId(3);
-		s3.setGPA(87.9);
+		s3.setGPA(67.9);
 		s3.recommended_number = 3;
 		List<Integer> pref3 = new ArrayList<Integer>();
 		pref3.add(2);
@@ -314,12 +338,15 @@ public class Match {
 		pref3.add(4);
 		pref3.add(5);
 		pref3.add(6);
+		pref3.add(7);
+		pref3.add(8);
+		pref3.add(9);
 		s3.set_preference(pref3);
 		students.add(s3);
 
 		Student s4 = new Student();
 		s4.setId(4);
-		s4.setGPA(85.7);
+		s4.setGPA(55.7);
 		s4.recommended_number = 3;
 		List<Integer> pref4 = new ArrayList<Integer>();
 		pref4.add(1);
@@ -327,6 +354,10 @@ public class Match {
 		pref4.add(3);
 		pref4.add(4);
 		pref4.add(5);
+		pref4.add(6);
+		pref4.add(7);
+		pref4.add(8);
+		pref4.add(9);
 		s4.set_preference(pref4);
 		students.add(s4);
 	}
