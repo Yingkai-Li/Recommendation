@@ -12,12 +12,13 @@ public class Match {
 	private static HashMap<Integer, ArrayList<Integer>> according_matching = new HashMap<Integer, ArrayList<Integer>>();
 	private static HashMap<Integer, ArrayList<Matched_School>> best_matching = new HashMap<Integer, ArrayList<Matched_School>>();
 	private static ArrayList<ArrayList<Integer>> ranks = new ArrayList<ArrayList<Integer>>();
+	private static ArrayList<ArrayList<Integer>> rank_result = new ArrayList<ArrayList<Integer>>();
 	private static double best_total_utility = 0;
 	
 	public static void main(String[] args) throws IOException{
 		int i = 0;
-		int count = 0;
-		int adjust_student_index = 0;
+		//int count = 0;
+		//int adjust_student_index = 0;
 		load_data();
 		System.out.print(students.size() + " " + universities.size() + "\n");
 		for (i = 0; i < universities.size(); i++) {
@@ -51,90 +52,126 @@ public class Match {
 				according_matching.get(tmp.get(j).school_id).add(i);
 			}
 		}
-		while (true) {
-			if (adjustable(adjust_student_index)) {
-				adjust_matching(adjust_student_index);
+		arrange_assigned_school(0);
+		print_result();
+	}
+	
+	private static void arrange_assigned_school(int adjust_student_index) {
+		int i = 0;
+		if (adjustable(adjust_student_index)) {
+			if (adjust_student_index == students.size() - 1) {
+				ranks.clear();
+				rank_result.clear();
+				for (i = 0; i < according_matching.size(); i++) {
+					ArrayList<Integer> tmp = new ArrayList<Integer>();
+					ArrayList<Integer> tmp2 = new ArrayList<Integer>();
+					for (int j = 0; j < according_matching.get(i).size(); j++) {
+						tmp.add(j+1);
+					}
+					ranks.add(tmp);
+					rank_result.add(tmp2);
+				}
+				perm(0);
+				System.out.print("AAAAAA" + "\n");
+				print_matching();
+				System.out.print("BBBBBB" + "\n");
 			}
 			else {
-				if (adjust_student_index == students.size() - 1) {
-					print_result();
-					return;
+				for (i = adjust_student_index + 1; i < students.size(); i++) {
+					restore_intial_configuration(i);
 				}
-				else {
-					adjust_student_index++;
-					adjust_matching(adjust_student_index);
-					for (i = 0; i < adjust_student_index; i++) {
-						restore_intial_configuration(i);
+				arrange_assigned_school(adjust_student_index+1);
+			}
+			adjust_matching(adjust_student_index);
+			arrange_assigned_school(adjust_student_index);
+		}
+		else {
+			if (adjust_student_index == students.size() - 1) {
+				ranks.clear();
+				rank_result.clear();
+				for (i = 0; i < according_matching.size(); i++) {
+					ArrayList<Integer> tmp = new ArrayList<Integer>();
+					ArrayList<Integer> tmp2 = new ArrayList<Integer>();
+					for (int j = 0; j < according_matching.get(i).size(); j++) {
+						tmp.add(j+1);
 					}
+					ranks.add(tmp);
+					rank_result.add(tmp2);
 				}
+				perm(0);
+				System.out.print("AAAAAA" + "\n");
+				print_matching();
+				System.out.print("BBBBBB" + "\n");
+				return;
 			}
-			ranks.clear();
-			for (i = 0; i < according_matching.size(); i++) {
-				ArrayList<Integer> tmp = new ArrayList<Integer>();
-				for (int j = 0; j < according_matching.get(i).size(); j++) {
-					tmp.add(j+1);
-				}
-				ranks.add(tmp);
+			else {
+				arrange_assigned_school(adjust_student_index+1);
 			}
-			perm(0, 0);
-			count++;
-			System.out.print(count + ":" + best_total_utility + "\n");
-			//print_matching();
 		}
 	}
 	
-	private static void perm(int univ_index, int start_index) {
-		if (univ_index == ranks.size()) {
-			return;
-		}
-		ArrayList<Integer> buffer = ranks.get(univ_index);
-		int end_index = buffer.size() - 1;
-		if (end_index == -1) {
-			perm(univ_index+1, 0);
-		}
-		if (start_index == end_index) {
-			for (int i = 0; i < matching.size(); i++) {
-				ArrayList<Matched_School> tmp = matching.get(i);
-				for (int j = 0; j < tmp.size(); j++) {
-					int index = according_matching.get(tmp.get(j).school_id).indexOf(i);
-					tmp.get(j).rank = ranks.get(tmp.get(j).school_id).get(index);
-				}
+	private static void perm(int univ_index) {
+		ArrayList<Integer> permList = ranks.get(univ_index);
+		ArrayList<Integer> resList = rank_result.get(univ_index);
+		int length = permList.size();
+		if (length == 0) {
+			if (univ_index == ranks.size() - 1) {
+				update_max_utility_by_matching();
 			}
-			double utility = calculate_utility();
-			//System.out.print(utility + "\n");
-			if (utility > best_total_utility) {
-				System.out.print(univ_index + ":" + start_index + "\n");
-				best_total_utility = utility;
-				best_matching.clear();
-				for (int i = 0; i < students.size(); i++) {
-					ArrayList<Matched_School> tmp = new ArrayList<Matched_School>();
-					ArrayList<Matched_School> matching_tmp = matching.get(i);
-					for (int j = 0; j < matching_tmp.size(); j++) {
-						Matched_School tmp_school = new Matched_School();
-						tmp_school.rank = matching_tmp.get(j).rank;
-						tmp_school.school_id = matching_tmp.get(j).school_id;
-						tmp.add(tmp_school);
-					}
-					best_matching.put(i, tmp);
-				}
-				//best_matching = new HashMap<Integer, ArrayList<Matched_School>>(matching);
-				print_matching();
-				print_result();
-				print_according_matching();
-				print_ranks();
+			else {
+				perm(univ_index+1);
 			}
-			//print_result();
-			perm(univ_index+1, 0);
 		}
 		else {
-			for (int i = start_index; i < end_index; i++) {
-				int tmp = buffer.get(start_index);
-				buffer.set(start_index, buffer.get(i));
-				buffer.set(i, tmp);
-				perm(univ_index, start_index + 1);
-				tmp = buffer.get(start_index);
-				buffer.set(start_index, buffer.get(i));
-				buffer.set(i, tmp);
+			long fac = 1;
+			long index = 0;
+			int j = 0;
+			int w = 0;
+			for (int i = 1; i <= length; i++) {
+				fac *= i;
+			}
+			for (index = 0; index < fac; index++) {
+				long tmp = index;
+				resList.clear();
+				for (j = 1; j <= length; j++) {
+					w = (int) (tmp % j);
+					resList.add(w, permList.get(j-1));
+					tmp = tmp / j;
+				}
+				if (univ_index == ranks.size() - 1) {
+					update_max_utility_by_matching();
+				}
+				else {
+					perm(univ_index+1);
+				}
+			}
+		}
+	}
+	
+	private static void update_max_utility_by_matching() {
+		for (int i = 0; i < matching.size(); i++) {
+			ArrayList<Matched_School> tmp = matching.get(i);
+			for (int j = 0; j < tmp.size(); j++) {
+				int index = according_matching.get(tmp.get(j).school_id).indexOf(i);
+				tmp.get(j).rank = rank_result.get(tmp.get(j).school_id).get(index);
+			}
+		}
+		double utility = calculate_utility();
+		System.out.print(utility + "\n");
+		print_matching();
+		if (utility > best_total_utility) {
+			best_total_utility = utility;
+			best_matching.clear();
+			for (int i = 0; i < students.size(); i++) {
+				ArrayList<Matched_School> tmp = new ArrayList<Matched_School>();
+				ArrayList<Matched_School> matching_tmp = matching.get(i);
+				for (int j = 0; j < matching_tmp.size(); j++) {
+					Matched_School tmp_school = new Matched_School();
+					tmp_school.rank = matching_tmp.get(j).rank;
+					tmp_school.school_id = matching_tmp.get(j).school_id;
+					tmp.add(tmp_school);
+				}
+				best_matching.put(i, tmp);
 			}
 		}
 	}
@@ -156,7 +193,7 @@ public class Match {
 	
 	private static double calculate_probability(double score, int rank, int school_id) {
 		double p =  (score * Math.sqrt(Math.sqrt(school_id))) / (Math.sqrt(rank) * 200.0);
-		/*if (school_id == 0) {
+		if (school_id == 0) {
 			return 0.2;
 		}
 		if (school_id == 1) {
@@ -173,7 +210,7 @@ public class Match {
 		}
 		if (school_id > 4) {
 			return 0;
-		}*/
+		}
 		if (p > 1.0) {
 			return 1.0;
 		}
@@ -198,7 +235,6 @@ public class Match {
 		Student s = students.get(student_id);
 		int num = s.get_prefernce_size() - 1;
 		ArrayList<Matched_School> tmp_matched_schools = matching.get(student_id);
-		//if (tmp_matched_schools.get(index))
 		for (int i = tmp_matched_schools.size() - 1; i >= 0; i--) {
 			if (tmp_matched_schools.get(i).school_id == s.get_preference_at(num)) {
 				num--;
@@ -209,7 +245,7 @@ public class Match {
 				according_matching.get(tmp_matched.school_id).remove(Integer.valueOf(student_id));
 				tmp_matched.school_id = s.get_preference_at(num);
 				according_matching.get(tmp_matched.school_id).add(student_id);
-				for (int j = i + 1; j < tmp_matched_schools.size() - 1; j++) {
+				for (int j = i + 1; j < tmp_matched_schools.size(); j++) {
 					num++;
 					Matched_School tmp = tmp_matched_schools.get(j);
 					according_matching.get(tmp.school_id).remove(Integer.valueOf(student_id));
@@ -269,9 +305,9 @@ public class Match {
 		for (i = 0; i < university_num; i++) {
 			University tmp_university = new University();
 			tmp_university.Id = i;
-			tmp_university.weight = 1.0;
+			//tmp_university.weight = 1.0;
 			//tmp_university.weight = 10.0 / (double)(i+1);
-			//tmp_university.weight = 10 - i;
+			tmp_university.weight = 10 - i;
 			universities.add(tmp_university);
 		}
 		/*for (i = 0; i < 15; i++) {
@@ -290,7 +326,7 @@ public class Match {
 		s0.setGPA(99.7);
 		s0.recommended_number = 3;
 		List<Integer> pref0 = new ArrayList<Integer>();
-		//pref0.add(0);
+		pref0.add(0);
 		pref0.add(1);
 		pref0.add(2);
 		pref0.add(3);
@@ -299,12 +335,12 @@ public class Match {
 		s0.set_preference(pref0);
 		students.add(s0);
 		
-		Student s1 = new Student();
+		/*Student s1 = new Student();
 		s1.setId(1);
 		s1.setGPA(90.7);
 		s1.recommended_number = 3;
 		List<Integer> pref1 = new ArrayList<Integer>();
-		//pref1.add(0);
+		pref1.add(0);
 		pref1.add(1);
 		pref1.add(2);
 		pref1.add(3);
@@ -313,7 +349,7 @@ public class Match {
 		s1.set_preference(pref1);
 		students.add(s1);
 		
-		Student s2 = new Student();
+		/*Student s2 = new Student();
 		s2.setId(2);
 		s2.setGPA(79.4);
 		s2.recommended_number = 3;
@@ -328,7 +364,7 @@ public class Match {
 		s2.set_preference(pref2);
 		students.add(s2);
 
-		Student s3 = new Student();
+		/*Student s3 = new Student();
 		s3.setId(3);
 		s3.setGPA(67.9);
 		s3.recommended_number = 3;
@@ -359,7 +395,7 @@ public class Match {
 		pref4.add(8);
 		pref4.add(9);
 		s4.set_preference(pref4);
-		students.add(s4);
+		students.add(s4);*/
 	}
 	
 	private static void print_result() {
