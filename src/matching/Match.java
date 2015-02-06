@@ -54,6 +54,7 @@ public class Match {
 		}
 		arrange_assigned_school(0);
 		print_result();
+		System.out.print(check_fairness());
 	}
 	
 	private static void arrange_assigned_school(int adjust_student_index) {
@@ -157,8 +158,8 @@ public class Match {
 			}
 		}
 		double utility = calculate_utility();
-		System.out.print(utility + "\n");
-		print_matching();
+		//System.out.print(utility + "\n");
+		//print_matching();
 		if (utility > best_total_utility) {
 			best_total_utility = utility;
 			best_matching.clear();
@@ -184,7 +185,8 @@ public class Match {
 			Student s = students.get(i);
 			for (int j = 0; j < tmp.size(); j++) {
 				double probability = calculate_probability(s.getGPA(), tmp.get(j).rank, tmp.get(j).school_id);
-				total_utility += total_probability * probability * universities.get(tmp.get(j).school_id).weight;
+				//total_utility += total_probability * probability * universities.get(tmp.get(j).school_id).weight;
+				total_utility += total_probability * probability * s.get_weight(tmp.get(j).school_id);
 				total_probability *= (1.0 - probability);
 			}
 		}
@@ -192,8 +194,8 @@ public class Match {
 	}
 	
 	private static double calculate_probability(double score, int rank, int school_id) {
-		double p =  (score * Math.sqrt(Math.sqrt(school_id))) / (Math.sqrt(rank) * 200.0);
-		if (school_id == 0) {
+		double p =  (score * Math.sqrt(Math.sqrt(school_id+1))) / (Math.sqrt(rank) * 200.0);
+		/*if (school_id == 0) {
 			return 0.2;
 		}
 		if (school_id == 1) {
@@ -210,7 +212,7 @@ public class Match {
 		}
 		if (school_id > 4) {
 			return 0;
-		}
+		}*/
 		if (p > 1.0) {
 			return 1.0;
 		}
@@ -288,6 +290,40 @@ public class Match {
 		}
 	}
 	
+	private static boolean check_fairness() {
+		double this_util = 0.0;
+		double lower_util = 0.0;
+		for (int i = 0; i < matching.size(); i++) {
+			this_util = 0.0;
+			ArrayList<Matched_School> tmp = matching.get(i);
+			double total_probability = 1.0;
+			Student s = students.get(i);
+			for (int j = 0; j < tmp.size(); j++) {
+				double probability = calculate_probability(s.getGPA(), tmp.get(j).rank, tmp.get(j).school_id);
+				//total_utility += total_probability * probability * universities.get(tmp.get(j).school_id).weight;
+				this_util += total_probability * probability * s.get_weight(tmp.get(j).school_id);
+				total_probability *= (1.0 - probability);
+			}
+			//System.out.print(i + ":" + this_util + "\n");
+			for (int k = i+1; k < matching.size(); k++) {
+				lower_util = 0.0;
+				total_probability = 1.0;
+				ArrayList<Matched_School> tmptmp = matching.get(k);
+				for (int j = 0; j < tmptmp.size(); j++) {
+					double probability = calculate_probability(s.getGPA(), tmptmp.get(j).rank, tmptmp.get(j).school_id);
+					//total_utility += total_probability * probability * universities.get(tmp.get(j).school_id).weight;
+					lower_util += total_probability * probability * s.get_weight(tmptmp.get(j).school_id);
+					total_probability *= (1.0 - probability);
+				}
+				if (lower_util > this_util) {
+					System.out.print(i + ":" + this_util + ", " + k + ":" + lower_util + "\n");
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	private static void print_student() {
 		for (int i = 0; i < students.size(); i++) {
 			System.out.print(i + " " + students.get(i).get_prefernce_size() + ":");
@@ -325,62 +361,70 @@ public class Match {
 		s0.setId(0);
 		s0.setGPA(99.7);
 		s0.recommended_number = 3;
-		List<Integer> pref0 = new ArrayList<Integer>();
-		pref0.add(0);
-		pref0.add(1);
-		pref0.add(2);
-		pref0.add(3);
-		pref0.add(4);
-		pref0.add(5);
-		s0.set_preference(pref0);
+		s0.add_weight(0, 10.0);
+		s0.add_weight(1, 8.0);
+		s0.add_weight(2, 6.0);
+		s0.add_weight(3, 4.0);
+		s0.add_weight(4, 2.0);
+		s0.add_weight(5, 1.0);
+		s0.set_preference_from_weight();
 		students.add(s0);
 		
-		/*Student s1 = new Student();
+		Student s1 = new Student();
 		s1.setId(1);
 		s1.setGPA(90.7);
 		s1.recommended_number = 3;
-		List<Integer> pref1 = new ArrayList<Integer>();
-		pref1.add(0);
-		pref1.add(1);
-		pref1.add(2);
-		pref1.add(3);
-		pref1.add(4);
-		pref1.add(5);
-		s1.set_preference(pref1);
+		s1.add_weight(0, 10.0);
+		s1.add_weight(1, 10.0);
+		s1.add_weight(2, 8.0);
+		s1.add_weight(3, 6.0);
+		s1.add_weight(4, 4.0);
+		s1.add_weight(5, 2.0);
+		s1.set_preference_from_weight();
 		students.add(s1);
 		
-		/*Student s2 = new Student();
+		Student s2 = new Student();
 		s2.setId(2);
 		s2.setGPA(79.4);
 		s2.recommended_number = 3;
-		List<Integer> pref2 = new ArrayList<Integer>();
-		pref2.add(1);
-		pref2.add(2);
-		pref2.add(3);
-		pref2.add(4);
-		pref2.add(5);
-		pref2.add(6);
-		pref2.add(7);
-		s2.set_preference(pref2);
+		s2.add_weight(0, 10.0);
+		s2.add_weight(1, 10.0);
+		s2.add_weight(2, 9.0);
+		s2.add_weight(3, 7.0);
+		s2.add_weight(4, 5.0);
+		s2.add_weight(5, 3.0);
+		s2.add_weight(6, 1.0);
+		s2.set_preference_from_weight();
 		students.add(s2);
 
 		/*Student s3 = new Student();
 		s3.setId(3);
 		s3.setGPA(67.9);
 		s3.recommended_number = 3;
-		List<Integer> pref3 = new ArrayList<Integer>();
+		s3.add_weight(0, 10.0);
+		s3.add_weight(1, 10.0);
+		s3.add_weight(2, 10.0);
+		s3.add_weight(3, 8.0);
+		s3.add_weight(4, 6.0);
+		s3.add_weight(5, 4.0);
+		s3.add_weight(6, 3.0);
+		s3.add_weight(7, 1.0);
+		s3.set_preference_from_weight();
+		/*List<Integer> pref3 = new ArrayList<Integer>();
+		pref3.add(0);
+		pref3.add(1);
 		pref3.add(2);
 		pref3.add(3);
 		pref3.add(4);
 		pref3.add(5);
 		pref3.add(6);
-		pref3.add(7);
-		pref3.add(8);
-		pref3.add(9);
-		s3.set_preference(pref3);
-		students.add(s3);
+		//pref3.add(7);
+		//pref3.add(8);
+		//pref3.add(9);
+		s3.set_preference(pref3);*/
+		//students.add(s3);
 
-		Student s4 = new Student();
+		/*Student s4 = new Student();
 		s4.setId(4);
 		s4.setGPA(55.7);
 		s4.recommended_number = 3;

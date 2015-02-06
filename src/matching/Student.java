@@ -1,6 +1,7 @@
 package matching;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Student {
@@ -8,8 +9,21 @@ public class Student {
 	private double GPA;
 	public int recommended_number;
 	private ArrayList<Integer> preference = new ArrayList<Integer>();
+	private HashMap<Integer, Double> weight = new HashMap<Integer, Double>();
 	public boolean tmp_match_status = false;
 	public int propose_num = 0;
+	
+	public double get_weight(int school_id) {
+		return weight.get(school_id);
+	}
+	
+	public void add_weight(int school_id, double w) {
+		weight.put(school_id, w);
+	}
+	
+	public void set_preference_from_weight() {
+		preference = new ArrayList<Integer>(weight.keySet());
+	}
 	
 	public void set_preference(List<Integer> pref) {
 		preference = new ArrayList<Integer>(pref);
