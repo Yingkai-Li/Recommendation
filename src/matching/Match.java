@@ -71,9 +71,9 @@ public class Match {
 					rank_result.add(tmp2);
 				}
 				perm(0);
-				System.out.print("AAAAAA" + "\n");
+				/*System.out.print("AAAAAA" + "\n");
 				print_matching();
-				System.out.print("BBBBBB" + "\n");
+				System.out.print("BBBBBB" + "\n");*/
 			}
 			else {
 				for (i = adjust_student_index + 1; i < students.size(); i++) {
@@ -98,12 +98,15 @@ public class Match {
 					rank_result.add(tmp2);
 				}
 				perm(0);
-				System.out.print("AAAAAA" + "\n");
+				/*System.out.print("AAAAAA" + "\n");
 				print_matching();
-				System.out.print("BBBBBB" + "\n");
+				System.out.print("BBBBBB" + "\n");*/
 				return;
 			}
 			else {
+				for (i = adjust_student_index + 1; i < students.size(); i++) {
+					restore_intial_configuration(i);
+				}
 				arrange_assigned_school(adjust_student_index+1);
 			}
 		}
@@ -156,6 +159,28 @@ public class Match {
 			}
 		}
 		double utility = calculate_utility();
+		/*System.out.print("AAAAAA" + "\n");
+		System.out.print(check_fairness() + "\n");
+		print_matching();
+		System.out.print("BBBBBB" + "\n");*/
+
+		if (check_fairness()) {
+			int flag = 1;
+			for (int i = 0; i < ranks.size(); i++) {
+				ArrayList<Integer> tmpr = ranks.get(i);
+				for (int j = 0; j < tmpr.size(); j++) {
+					if (tmpr.get(j) > 1) {
+						flag = 0;
+					}
+				}
+			}
+			if (flag == 1) {
+				System.out.print("AAAAAA" + "\n");
+				System.out.print(check_fairness() + ": " + utility + "\n");
+				print_matching();
+				System.out.print("BBBBBB" + "\n");
+			}
+		}
 		if (utility > best_total_utility && check_fairness()) {
 			System.out.print("best_total_utility:" + utility + "\n");
 			best_total_utility = utility;
@@ -368,7 +393,7 @@ public class Match {
 		s1.add_weight(0, 10.0);
 		s1.add_weight(1, 8.0);
 		s1.add_weight(2, 6.0);
-		s1.add_weight(3, 10.0);
+		s1.add_weight(3, 7.0);
 		//s1.add_weight(4, 4.0);
 		//s1.add_weight(5, 2.0);
 		s1.set_preference_from_weight();
@@ -388,7 +413,7 @@ public class Match {
 		s2.set_preference_from_weight();
 		students.add(s2);
 
-		/*Student s3 = new Student();
+		Student s3 = new Student();
 		s3.setId(3);
 		s3.setGPA(67.9);
 		s3.recommended_number = 3;
